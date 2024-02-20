@@ -24,14 +24,14 @@ source("HMSC fitting function.R")
 
 
 ########################
-## Load observer data ##
+## Load catch data    ##
 ########################
-## These data are fake data to illustrate the format
-## the original observer data is confidential
+## These fishing trip-level data are fake, used to illustrate the format
+## the original observer data are confidential
 
 ## Load environmental variables and biomass (catch) data
-enviro_data <- readRDS(...)  #ensure factors have been labelled as factors
-biomass_data <- readRDS("obs_dat_trip_split.rds")
+enviro_data <- readRDS(...)  #mean conditions per trip; ensure factors have been labelled as factors
+biomass_data <- readRDS("example_catch_data.rds")  #simulated catch data (kg per trip)
 
 ## Create presence and positive hurdle components
 biomass_data_pres <- biomass_data
