@@ -30,8 +30,8 @@ source("HMSC fitting function.R")
 ## the original observer data are confidential
 
 ## Load environmental variables and biomass (catch) data
-enviro_data <- readRDS(...)  #mean conditions per trip; ensure factors have been labelled as factors
-biomass_data <- readRDS("example_catch_data.rds")  #simulated catch data (kg per trip)
+enviro_data <- readRDS("example_enviro_data.rds")  #mean conditions per trip; ensure factors have been labelled as factors; fake data
+biomass_data <- readRDS("example_catch_data.rds")  #fake catch data (kg per trip)
 
 ## Create presence and positive hurdle components
 biomass_data_pres <- biomass_data
@@ -57,19 +57,19 @@ spp_max <- apply(biomass_data, 2, FUN=max)
 
 save_model_suffix = "mymodel_date"
 
-fit_hmsc <- fit_hmsc_hurdle (train_data_pres = obs_data_pres,
-                             train_data_posi = obs_data_posi,
-                             species_list = spp_list_hmsc,
-                             first_taxon = spp_list_hmsc[1],
-                             nChains = 3,
-                             thin = 10,
-                             samples = 1000,
-                             transient = 10000,
-                             nParallel = 1,  #recommend start with 1 to benchmark computation time
-                             YScale = T,
-                             calc_fit = T,
-                             save_model = T,
-                             save_model_suffix = save_model_suffix)
+fit_hmsc <- fit_hmsc_hurdle(train_data_pres = obs_data_pres,
+                            train_data_posi = obs_data_posi,
+                            species_list = spp_list_hmsc,
+                            first_taxon = spp_list_hmsc[1],
+                            nChains = 3,
+                            thin = 10,
+                            samples = 1000,
+                            transient = 10000,
+                            nParallel = 1,  #recommend start with 1 to benchmark computation time
+                            YScale = T,
+                            calc_fit = T,
+                            save_model = T,
+                            save_model_suffix = save_model_suffix)
 
 saveRDS(fit_hmsc, paste0("Fit_hmsc_summary_results.rds"))
 
@@ -183,8 +183,8 @@ for (ff in 1:dim(predsA)[3]) {
 }
 num_outliers   #number of outliers removed
 
-## Take median (or mean) of posterior for point estimates of total biomass
-preds_t_mean <- apply(preds_t, c(1,2), median, na.rm=T)
+## Take mean (or *median*) of posterior for point estimates of total biomass
+preds_t_mean <- apply(preds_t, c(1,2), mean, na.rm=T)
 saveRDS(preds_t_mean, paste0("TotalPreds_CV_",save_model_suffix,".rds"))
 
 ## Plot some observed vs predicted biomasses
@@ -283,8 +283,8 @@ for (ff in 1:dim(predsAc)[3]) {
 }
 num_outliers   #number of outliers removed 
 
-## Take median (or mean) of posterior for point estimates of total biomass
-preds_t_mean <- apply(preds_t, c(1,2), median, na.rm=T)
+## Take mean (or *median*) of posterior for point estimates of total biomass
+preds_t_mean <- apply(preds_t, c(1,2), mean, na.rm=T)
 saveRDS(preds_t_mean, paste0("TotalPredsCOND_CV_",save_model_suffix,".rds"))
 
 ## Plot some observed vs conditional predicted biomasses
