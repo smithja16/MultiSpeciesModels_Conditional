@@ -22,7 +22,7 @@ fit_rf_hurdle_cond <- function(spp_list_response,  #the discard species are the 
   
   save_rf_perf <- data.frame(species=spp_list_response,
                              pres_oob_error_perc=0,
-                             abund_perc_var_expl=0)
+                             posi_perc_var_expl=0)
   
   colx <- which(names(data_train_pres)==first_taxon)
   
@@ -43,8 +43,6 @@ fit_rf_hurdle_cond <- function(spp_list_response,  #the discard species are the 
                                            ncol=length(spp_list_response)))
     save_test_total <- save_test_pres
   }
-  
-  save_prev <- data.frame(species=spp_list, prevalence=0)  #if using 'prevalence' option
   
   pb <- txtProgressBar(min=0, max=length(spp_list_response))
   
@@ -71,23 +69,23 @@ fit_rf_hurdle_cond <- function(spp_list_response,  #the discard species are the 
                                keep.forest=T)
     }
     
-    obs_dat_trip_split_abundx <- data_train  #remove all rows that are zero for RESPONSE SPECIES ONLY
-    rows0 <- which(obs_dat_trip_split_abundx[,sppx]==0)  #which rows are zero for this species
+    data_posix <- data_train  #remove all rows that are zero for RESPONSE SPECIES ONLY
+    rows0 <- which(data_posix[,sppx]==0)  #which rows are zero for this species
     if (length(rows0) > 0) {
-      obs_dat_trip_split_abundx <- obs_dat_trip_split_abundx[-rows0,]
+      data_posix <- data_posix[-rows0,]
     }
     
     if (conditional == T) {
-      Mrf_abund <- randomForest(as.formula(paste0(sppx," ~ meanLat + meanDepth_ftm + month + meanGlorys_sst +
+      Mrf_posi <- randomForest(as.formula(paste0(sppx," ~ meanLat + meanDepth_ftm + month + meanGlorys_sst +
                                          meanGlorys_mld + lunar_illum + area_swept_km2 + total_catch_kg + ",
                                                   paste(spp_list_covar, collapse=" + "))),
-                                data=obs_dat_trip_split_abundx, importance=T,
+                                data=data_posix, importance=T,
                                 keep.inbag=T, ntree=1201, mtry=3,
                                 keep.forest=T)
     } else {
-      Mrf_abund <- randomForest(as.formula(paste0(sppx," ~ meanLat + meanDepth_ftm + month + meanGlorys_sst +
+      Mrf_posi <- randomForest(as.formula(paste0(sppx," ~ meanLat + meanDepth_ftm + month + meanGlorys_sst +
                                          meanGlorys_mld + lunar_illum + area_swept_km2 + total_catch_kg")),
-                                data=obs_dat_trip_split_abundx, importance=T,
+                                data=data_posix, importance=T,
                                 keep.inbag=T, ntree=1201, mtry=2,
                                 keep.forest=T)
     }
@@ -95,15 +93,15 @@ fit_rf_hurdle_cond <- function(spp_list_response,  #the discard species are the 
     if (save_models == T) {
       if (conditional == T) {
         saveRDS(Mrf_pres, paste0("Mrf_pres_cond_spp_",sppx,".rds"))
-        saveRDS(Mrf_abund, paste0("Mrf_abund_cond_spp_",sppx,".rds"))
+        saveRDS(Mrf_posi, paste0("Mrf_posi_cond_spp_",sppx,".rds"))
       } else {
         saveRDS(Mrf_pres, paste0("Mrf_pres_marg_spp_",sppx,".rds"))
-        saveRDS(Mrf_abund, paste0("Mrf_abund_marg_spp_",sppx,".rds"))
+        saveRDS(Mrf_posi, paste0("Mrf_posi_marg_spp_",sppx,".rds"))
       }
     }
     
     save_rf_perf$pres_oob_error_perc[ss] <- round((Mrf_pres$err.rate[nrow(Mrf_pres$err.rate),1]*100),2)
-    save_rf_perf$abund_perc_var_expl[ss] <- round(Mrf_abund$rsq[nrow(Mrf_pres$err.rate)]*100,2)
+    save_rf_perf$posi_perc_var_expl[ss] <- round(Mrf_posi$rsq[length(Mrf_posi$rsq)]*100,2)
     
     
     if (pres_prevalence == T) {  #calculate threshold for this species based on its prevalence
@@ -111,14 +109,13 @@ fit_rf_hurdle_cond <- function(spp_list_response,  #the discard species are the 
       pres_thresholdx <- data_train_pres[,colxx]
       pres_threshold <- length(pres_thresholdx[pres_thresholdx==1])/nrow(data_train)
       if (pres_threshold > 0.95) { pres_threshold <- 0.95 }
-      save_prev$prevalence[ss] <- pres_threshold
     }
     
     #calculate fitted values
     P_pres <- predict(Mrf_pres, newdata=data_train, type="prob")[,2]  #probability of presence
     P_pres[P_pres < pres_threshold] <- 0
-    P_abund <- predict(Mrf_abund, newdata=data_train, type="response")
-    P_total <- P_pres * P_abund
+    P_posi <- predict(Mrf_posi, newdata=data_train, type="response")
+    P_total <- P_pres * P_posi
     
     fitted_values[,sppx] <- P_total
     
@@ -127,8 +124,8 @@ fit_rf_hurdle_cond <- function(spp_list_response,  #the discard species are the 
     } else {
       P_pres_test <- predict(Mrf_pres, data_test, type="prob")[,2]
       P_pres_test[P_pres_test < pres_threshold] <- 0
-      P_abund_test <- predict(Mrf_abund, data_test, type="response")
-      P_total_test <- P_pres_test*P_abund_test
+      P_posi_test <- predict(Mrf_posi, data_test, type="response")
+      P_total_test <- P_pres_test*P_posi_test
       
       save_test_pres[,ss] <- P_pres_test
       save_test_total[,ss] <- P_total_test
