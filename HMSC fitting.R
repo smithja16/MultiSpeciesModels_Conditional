@@ -26,12 +26,12 @@ source("HMSC fitting function.R")
 ########################
 ## Load catch data    ##
 ########################
-## These fishing trip-level data are fake, used to illustrate the format
-## the original observer data are confidential
+## These catch and environment data are fake, used to illustrate the format
+## The original observer data are confidential
 
 ## Load environmental variables and biomass (catch) data
-enviro_data <- readRDS("example_enviro_data.rds")  #mean conditions per trip; ensure factors have been labelled as factors; fake data
-biomass_data <- readRDS("example_catch_data.rds")  #fake catch data (kg per trip)
+enviro_data <- readRDS("example_enviro_data.rds")  #mean conditions per trip; ensure factors have been labelled as factors
+biomass_data <- readRDS("example_catch_data.rds")  #catch data (kg per trip)
 
 ## Create presence and positive hurdle components
 biomass_data_pres <- biomass_data
@@ -57,8 +57,8 @@ spp_max <- apply(biomass_data, 2, FUN=max)
 
 save_model_suffix = "mymodel_date"
 
-fit_hmsc <- fit_hmsc_hurdle(train_data_pres = obs_data_pres,
-                            train_data_posi = obs_data_posi,
+fit_hmsc <- fit_hmsc_hurdle(train_data_pres = all_data_pres,
+                            train_data_posi = all_data_posi,
                             species_list = spp_list_hmsc,
                             first_taxon = spp_list_hmsc[1],
                             nChains = 3,
