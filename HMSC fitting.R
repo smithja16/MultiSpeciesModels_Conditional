@@ -55,6 +55,8 @@ spp_max <- apply(biomass_data, 2, FUN=max)
 ## Fit full hurdle model ##
 ###########################
 
+## These models are fit using all the data
+
 save_model_suffix = "mymodel_date"
 
 fit_hmsc <- fit_hmsc_hurdle(train_data_pres = all_data_pres,

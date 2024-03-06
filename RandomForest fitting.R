@@ -48,6 +48,8 @@ spp_list_dis <- readRDS("spp_list_dis.rds")  #discarded taxa
 ## Fit full hurdle models ##
 ############################
 
+## These models are fit using all the data
+
 rf_marginal <- fit_rf_hurdle_cond(spp_list_response = spp_list_dis,  
                                   spp_list_covar = spp_list_ret,
                                   first_taxon = spp_list_rf[1],
