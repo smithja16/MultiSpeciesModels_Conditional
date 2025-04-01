@@ -8,3 +8,5 @@ Run:
 
 Each script estimates and saves cross-validated predictive performance, which can then 
 be compared in any form the user desires.
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15116879.svg)](https://doi.org/10.5281/zenodo.15116879)
